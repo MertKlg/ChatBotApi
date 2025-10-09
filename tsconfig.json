@@ -2,14 +2,15 @@
   // Visit https://aka.ms/tsconfig to read more about this file
   "compilerOptions": {
     // File Layout
-    "rootDir": "./src",
+    "rootDir": "",
     "outDir": "./dist",
-
     // Environment Settings
     // See also https://aka.ms/tsconfig/module
     "module": "nodenext",
     "target": "esnext",
-    "types": ["jest"],
+    "types": [
+      "jest"
+    ],
     "esModuleInterop": true,
     "forceConsistentCasingInFileNames": true,
     "noImplicitAny": true,
@@ -17,16 +18,17 @@
     // "lib": ["esnext"],
     // "types": ["node"],
     // and npm install -D @types/node
-
     // Other Outputs
     "sourceMap": true,
     "declaration": true,
     "declarationMap": true,
-
     // Stricter Typechecking Options
     "noUncheckedIndexedAccess": true,
     "exactOptionalPropertyTypes": true,
-
+    "typeRoots": [
+      "./node_modules/@types",
+      "type"
+    ],
     // Style Options
     // "noImplicitReturns": true,
     // "noImplicitOverride": true,
@@ -34,7 +36,6 @@
     // "noUnusedParameters": true,
     // "noFallthroughCasesInSwitch": true,
     // "noPropertyAccessFromIndexSignature": true,
-
     // Recommended Options
     "strict": true,
     "jsx": "react-jsx",
@@ -45,9 +46,14 @@
     "skipLibCheck": true,
   },
   "include": [
-    "src",
-    "__test__/**/*.ts"
-, "jest.setup.ts"  ],
+    "src/**/*.ts",
+    "types/**/*.ts",
+    "__test__/**/*.ts",
+    "jest.setup.ts"
+  ],
+  "files": [
+    "./types/express/index.d.ts"
+  ],
   "exclude": [
     "node_modules"
   ],

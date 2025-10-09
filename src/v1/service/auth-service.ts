@@ -19,7 +19,7 @@ export const registerUser = async (data: RegisterUserDto): Promise<IResult<strin
         }
 
         const hashPassword = await hashData(data.password)
-        if(!hashPassword)
+        if (!hashPassword)
             throw new Error(ErrorMessages.SERVER.INTERVAL_SERVER_ERROR)
 
         await createUser({ id: crypto.randomUUID(), email: data.email, password: hashPassword }, e)
@@ -30,17 +30,17 @@ export const registerUser = async (data: RegisterUserDto): Promise<IResult<strin
     return result
 }
 
-export const signInUser = async (data: LoginUserDto): Promise<IResult<{ access_token: string, refresh_token : string }>> => {
+export const signInUser = async (data: LoginUserDto): Promise<IResult<{ access_token: string, refresh_token: string }>> => {
     const res = await db.transaction(async (e) => {
-        const findUser = await findUserByEmail(data.email,e)
+        const findUser = await findUserByEmail(data.email, e)
         if (!findUser)
             throw new Error(ErrorMessages.USER.USER_NOT_FOUND)
 
 
-        const userPassword = await findUserPassword(findUser.id,e)
+        const userPassword = await findUserPassword(findUser.id, e)
         if (!userPassword)
             throw new Error(ErrorMessages.USER.USER_NOT_FOUND)
-        
+
 
         const passwordIsTrue = await compare(data.password, userPassword.password)
         if (!passwordIsTrue)
@@ -49,12 +49,12 @@ export const signInUser = async (data: LoginUserDto): Promise<IResult<{ access_t
         // If the user is successfully logged in
         const refreshToken = crypto.randomUUID()
         const hashToken = hashValue(refreshToken)
-        await createRefreshToken({ user_id: findUser.id, token : hashToken, client : data.client, expiresAt : new Date(Date.now() + (30*24*60*60*1000))}, e)
+        await createRefreshToken({ user_id: findUser.id, token: hashToken, client: data.client, expiresAt: new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)) }, e)
 
         return {
             data: {
-                access_token: generateToken({id : findUser.id, jti : crypto.randomUUID()}, Date.now() + (15 * 60 * 1000)),
-                refresh_token : refreshToken
+                access_token: generateToken({ user_id: findUser.id, jti: crypto.randomUUID() }, Date.now() + (15 * 60 * 1000)),
+                refresh_token: refreshToken
             }
         }
     })
@@ -62,18 +62,18 @@ export const signInUser = async (data: LoginUserDto): Promise<IResult<{ access_t
     return res
 }
 
-export const refreshToken = async(data : RefreshToken)  : Promise<IResult<{access_token : string, refresh_token : string}>>=> {
+export const refreshToken = async (data: RefreshToken): Promise<IResult<{ access_token: string, refresh_token: string }>> => {
     const result = await db.transaction(async (e) => {
         // Generate new token
-        const access_token = generateToken({user_id : data.user_id, jti : crypto.randomUUID()}, Date.now() + (15 * 60 * 1000))
+        const access_token = generateToken({ user_id: data.user_id, jti: crypto.randomUUID() }, Date.now() + (15 * 60 * 1000))
 
         await deleteRefreshToken(data.id, e)
         // If token deleted create one
         const refreshToken = crypto.randomUUID()
         const hashToken = hashValue(refreshToken)
-        await createRefreshToken({ user_id: data.user_id, token : hashToken, client : data.client, expiresAt : data.expiresAt}, e)
-        
-        return { data : {access_token, refresh_token : refreshToken}}
+        await createRefreshToken({ user_id: data.user_id, token: hashToken, client: data.client, expiresAt: data.expiresAt }, e)
+
+        return { data: { access_token, refresh_token: refreshToken } }
     })
 
     return result

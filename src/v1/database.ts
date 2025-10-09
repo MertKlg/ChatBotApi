@@ -56,10 +56,10 @@ export class PostgreDatabase implements Database {
         }
     }
 
-    async transaction<T>(func: (poolClient: PoolClient) => Promise<IResult<T>>) : Promise<IResult<T>> {
+    async transaction<T>(func: (poolClient: PoolClient) => Promise<IResult<T>>): Promise<IResult<T>> {
         const connString = process.env.NODE_ENV?.toString().toLowerCase().trim() == AppConfig.MODE.TEST.toLowerCase().trim() ? process.env.TEST_DATABASE_URL : process.env.DATABASE_URL
 
-        const pool = new Pool({connectionString : connString})
+        const pool = new Pool({ connectionString: connString })
         const poolClient = await pool.connect()
         try {
             await poolClient.query(TransactionTypes.BEGIN)
@@ -68,9 +68,10 @@ export class PostgreDatabase implements Database {
 
             return result
         } catch (e) {
+            console.error(e)
             await poolClient.query(TransactionTypes.ROLLBACK)
             return {
-                error : e instanceof Error ? e : new Error("Interval server error")
+                error: e instanceof Error ? e : new Error("Interval server error")
             }
         } finally {
             poolClient.release()

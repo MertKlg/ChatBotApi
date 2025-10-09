@@ -27,16 +27,16 @@ authRouter.post("/sign-in", [
         }).withMessage(ErrorMessages.VALIDATION_ERROR.PASSWORD_LENGTH),
 
     body("client")
-    .escape()
-    .trim()
-    .notEmpty()
-    .withMessage("Client won't be empty")
-    .custom((client) => {
-        if(!AppConfig.ALLOWED_CLIENTS.includes(client))
-            throw new Error("Invalid client")
+        .escape()
+        .trim()
+        .notEmpty()
+        .withMessage("Client won't be empty")
+        .custom((client) => {
+            if (!AppConfig.ALLOWED_CLIENTS.includes(client))
+                throw new Error("Invalid client")
 
-        return true
-    }),
+            return true
+        }),
     validateInputs
 ], signIn)
 
@@ -76,25 +76,34 @@ authRouter.post("/sign-up", [
             max: AppConfig.passwordLength.max
         }).withMessage(ErrorMessages.VALIDATION_ERROR.PASSWORD_LENGTH)
         .custom((value, { req }) => {
-            if(value !== req.body.password){
+            if (value !== req.body.password) {
                 throw new Error(ErrorMessages.VALIDATION_ERROR.PASSWORDS_NOT_MATCH)
             }
             return true
         }),
-        validateInputs
-],signUp)
+    validateInputs
+], signUp)
 
-authRouter.post("/refresh",[body("client")
-    .escape()
-    .trim()
-    .notEmpty()
-    .withMessage("Client won't be empty")
-    .custom((client) => {
-        if(!AppConfig.ALLOWED_CLIENTS.includes(client))
-            throw new Error("Invalid client")
+authRouter.post("/refresh", [
+    body("client")
+        .escape()
+        .trim()
+        .notEmpty()
+        .withMessage("Client won't be empty")
+        .custom((client) => {
+            if (!AppConfig.ALLOWED_CLIENTS.includes(client))
+                throw new Error("Invalid client")
 
-        return true
-    }),validateInputs,refreshTokenValid] ,refresh)
+            return true
+        }),
+
+    body("refresh_token")
+        .escape()
+        .trim()
+        .notEmpty()
+        .withMessage("Refresh token is empty"),
+    validateInputs,
+    refreshTokenValid], refresh)
 
 
 export default authRouter 

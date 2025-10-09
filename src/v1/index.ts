@@ -7,8 +7,9 @@ import { PostgreDatabase } from "./database"
 import { RedisDatabase } from "./database-2"
 import chatRouter from "./router/chat-router"
 import { createServer } from "node:http"
-import {Server} from "socket.io"
+import { Server } from "socket.io"
 import { chatSocket } from "./socket"
+import profileRouter from "./router/profile-router"
 
 dotenv.config({
     path: [".env.development", ".env.production", ".env"]
@@ -33,10 +34,9 @@ chatSocket(new Server(server))
 
 
 app.use(express.json())
-
 app.use("/auth", authRouter)
 app.use("/chat", chatRouter)
-
+app.use("/profile", profileRouter)
 app.use(errorHandler)
 
 
