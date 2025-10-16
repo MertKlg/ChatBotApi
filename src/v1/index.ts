@@ -10,6 +10,7 @@ import { createServer } from "node:http"
 import { Server } from "socket.io"
 import { chatSocket } from "./socket"
 import profileRouter from "./router/profile-router"
+import AiRouter from "./router/ai-router"
 
 dotenv.config({
     path: [".env.development", ".env.production", ".env"]
@@ -37,12 +38,14 @@ app.use(express.json())
 app.use("/auth", authRouter)
 app.use("/chat", chatRouter)
 app.use("/profile", profileRouter)
+app.use("/ai", AiRouter)
 app.use(errorHandler)
 
 
 if (process.env.NODE_ENV == AppConfig.MODE.TEST) {
     server.listen(process.env.PORT || 3001, () => {
         console.log("Working on development mode", process.env.PORT)
+        console.log(process.env.PORT)
     })
 }
 

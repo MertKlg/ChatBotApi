@@ -3,7 +3,7 @@ import { withErrorHandling } from "../common/asyncHandler";
 import { ErrorResponse } from "../model/response/response";
 import { validateTokenAsync } from "../common/jwt";
 import { ErrorMessages } from "../common/messages";
-import { Event, Socket } from "socket.io";
+import { Socket } from "socket.io";
 import { findUserById } from "../model/auth/auth-model";
 
 // A basic handle verify user middleware
@@ -11,10 +11,10 @@ export const userValidateMiddleware = withErrorHandling(async (req: Request, res
     // If we want validate user we need check jwt token
     const token = req.headers.authorization
     if (!token)
-        throw new ErrorResponse(403, "Permission denied")
+        throw new ErrorResponse(401, ErrorMessages.SERVER.Unauthorized)
 
     if (token.split(' ')[0] !== "Bearer")
-        throw new ErrorResponse(403, "Permission denied")
+        throw new ErrorResponse(401, ErrorMessages.SERVER.Unauthorized)
 
     const bearerToken = token.split(' ')[1]
     if (!bearerToken)

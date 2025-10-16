@@ -1,7 +1,7 @@
 import { map } from "zod";
 import { ErrorMessages } from "../common/messages";
 import { PostgreDatabase } from "../database";
-import { IAllChatDto, IChat, IChatParticipants, IMessageDto } from "../model/chat/chat-interface";
+import { IAllChatDto, IChat, IChatMessageDto, IChatParticipants, IMessageDto } from "../model/chat/chat-interface";
 import { createChat, createMembers, createMessage, getAllChats, getChat, getMembers } from "../model/chat/chat-model";
 import { IResult } from "../model/response/response-interface";
 
@@ -50,3 +50,7 @@ export const createMessageService = async (messageDto: IMessageDto): Promise<IRe
         return { data: "Success" }
     })
 }
+
+export const getChatMessages = async (dto: IChatMessageDto) => {
+
+} 

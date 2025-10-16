@@ -1,15 +1,14 @@
 import { NextFunction, Request, Response } from "express";
 import { withErrorHandling } from "../common/asyncHandler";
-import { createChatService, getAllChatsService, getChatService } from "../service/chat-service";
+import { createChatService, getAllChatsService } from "../service/chat-service";
 import { ErrorResponse, ResponseModel } from "../model/response/response";
 import { ErrorMessages } from "../common/messages";
-import { getAllChats } from "../model/chat/chat-model";
 
 
-export const getChat = withErrorHandling(async (req: Request, res: Response, next: NextFunction) => {
+export const getChatMessages = withErrorHandling(async (req: Request, res: Response, next: NextFunction) => {
     const { id } = res.locals.id
-    const { chatId } = req.params
-
+    const { chatId, limit, page } = req.params
+    // Get chat messsages with chat.id from db
 })
 
 // Get all chats of that users
