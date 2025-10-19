@@ -2,10 +2,11 @@ import { PoolClient } from "pg"
 import { PostgreDatabase } from "../../database"
 import { CreateChat, IAllChat, IChat, IChatMessage, IChatParticipants, IMessage, IMessageDto } from "./chat-interface"
 import { transaction } from "../../common/types"
+import { IAi } from "../ai/ai-interface"
 
 let db = PostgreDatabase.getInstance()
 export const createChat = async (chat: CreateChat, transaction: transaction): Promise<IChat | undefined> => {
-    return (await db.query<IChat>('insert into chats (title, type) values($1,$2) RETURNING id', [chat.title, chat.type], undefined, transaction))[0]
+    return (await db.query<IChat>('insert into chats (title) values($1) RETURNING id', [chat.title], undefined, transaction))[0]
 }
 
 export const getChat = async (chatId: string, transaction: transaction): Promise<IChat | undefined> => {
@@ -13,16 +14,12 @@ export const getChat = async (chatId: string, transaction: transaction): Promise
 }
 
 export const getAllChats = async (userId: string, transaction: transaction): Promise<IAllChat[] | undefined> => {
-    return await db.query<IAllChat>('select chats.id, chats.title, chats.type,chat_participants.role, users.email as owner,chats.updated_at ,chats.created_at from chat_participants inner join chats on chats.id = chat_participants.chat_id join users on users.id = chat_participants.user_id where chat_participants.user_id = $1', [userId], undefined, transaction)
-}
-
-export const getChatMessages = async (model: IChatMessage, transaction: transaction): Promise<undefined> => {
-    //
+    return await db.query<IAllChat>('select chats.id, chats.title, users.email as owner, cp.role from chats join chat_participants cp on chats.id = cp.chat_id join users on users.id = cp.participants_id where cp.participants_id = $1', [userId], undefined, transaction)
 }
 
 /* Chat participants */
 export const createMembers = async (member: IChatParticipants, transaction: transaction) => {
-    await db.query("insert into chat_participants (chat_id, user_id, role) values ($1,$2,$3)", [member.chat_id, member.user_id, member.role], undefined, transaction)
+    await db.query("insert into chat_participants (chat_id, participants_id, role, type) values ($1,$2,$3,$4)", [member.chat_id, member.participants_id, member.role, member.type], undefined, transaction)
 }
 
 export const getMembers = async (userId: string, transaction: transaction): Promise<IChatParticipants[] | undefined> => {

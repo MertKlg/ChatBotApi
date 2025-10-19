@@ -1,20 +1,34 @@
-import { map } from "zod";
 import { ErrorMessages } from "../common/messages";
 import { PostgreDatabase } from "../database";
-import { IAllChatDto, IChat, IChatMessageDto, IChatParticipants, IMessageDto } from "../model/chat/chat-interface";
+import { IAiDTO } from "../model/ai/ai-interface";
+import { IChat, IChatMessageDto, IChatParticipants, IMessageDto } from "../model/chat/chat-interface";
 import { createChat, createMembers, createMessage, getAllChats, getChat, getMembers } from "../model/chat/chat-model";
 import { IResult } from "../model/response/response-interface";
 
 let db = PostgreDatabase.getInstance()
-export const createChatService = async (userId: string, title: string): Promise<IResult<string>> => {
+export const createChatService = async (userId: string, title: string, iAiDto: IAiDTO[]): Promise<IResult<string>> => {
     return db.transaction(async (e) => {
-        const getChat = await createChat({ title: title, type: 'ai_single' }, e)
+        console.log("Create starting")
+        const getChat = await createChat({ title: title }, e)
         const chatId = getChat?.id
         if (!chatId)
             throw new Error("Chat not founded")
 
-        await createMembers({ chat_id: chatId, user_id: userId, role: "owner" }, e)
+        console.log("Create chat finished")
+        console.log("Starting create members")
+        const members: IChatParticipants[] = []
 
+        iAiDto.forEach((e) => {
+            members.push({ chat_id: getChat.id, participants_id: e.id, role: 'member', type: 'ai_model' })
+        })
+        members.push({ chat_id: getChat.id, participants_id: userId, role: 'owner', type: 'user' })
+
+        const memberCreationStat = members.map(item => createMembers(item, e))
+
+        await Promise.all(memberCreationStat)
+        console.log("Ending.. create members")
+
+        console.log("Create ending")
         return { data: ErrorMessages.SERVER.SUCCESS }
     })
 }
@@ -25,7 +39,7 @@ export const getChatService = async (userId: string): Promise<IResult<(IChat | u
         if (!findMembers)
             throw new Error("No members founded")
 
-        const res = await Promise.all(findMembers.map(data => getChat(data.user_id, e)))
+        const res = await Promise.all(findMembers.map(data => getChat(data.participants_id, e)))
 
         return { data: res }
     })
@@ -33,7 +47,6 @@ export const getChatService = async (userId: string): Promise<IResult<(IChat | u
 
 export const getAllChatsService = async (userId: string): Promise<IResult<Record<string, IChat[]>>> => {
     return db.transaction(async (e) => {
-        // First of all, which user joined chats ?
         const chats = await getAllChats(userId, e)
         var mapping: Record<string, IChat[]> = {}
         if (!chats || chats.length < 0)

@@ -12,7 +12,7 @@ export interface IAllChat extends IChat {
 }
 
 export type IAllChatDto = Omit<IAllChat, ''>
-export type CreateChat = Omit<IChat, 'id' | 'created_at' | 'updated_at'>
+export type CreateChat = Omit<IChat, 'id' | 'created_at' | 'updated_at' | 'type'>
 export type GetChat = Omit<IChat, 'title' | 'type' | 'created_at' | 'updated_at'>
 
 export interface IChatMessageDto {
@@ -28,8 +28,9 @@ Chat Participants
 */
 export interface IChatParticipants {
     chat_id: string,
-    user_id: string,
-    role: 'member' | 'owner'
+    participants_id: string,
+    role: 'member' | 'owner',
+    type: 'user' | 'ai_model'
 }
 
 /* CHAT MESSAGES */
