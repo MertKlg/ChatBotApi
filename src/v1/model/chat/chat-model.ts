@@ -1,8 +1,6 @@
-import { PoolClient } from "pg"
 import { PostgreDatabase } from "../../database"
-import { CreateChat, IAllChat, IChat, IChatMessage, IChatParticipants, IMessage, IMessageDto } from "./chat-interface"
+import { CreateChat, IAllChat, IChat, IChatParticipants, IMessage, IMessageDto, QueryParticipantsDetails, ResultParticipantsDetails } from "./chat-interface"
 import { transaction } from "../../common/types"
-import { IAi } from "../ai/ai-interface"
 
 let db = PostgreDatabase.getInstance()
 export const createChat = async (chat: CreateChat, transaction: transaction): Promise<IChat | undefined> => {
@@ -24,6 +22,10 @@ export const createMembers = async (member: IChatParticipants, transaction: tran
 
 export const getMembers = async (userId: string, transaction: transaction): Promise<IChatParticipants[] | undefined> => {
     return await db.query("select chat_id, role from chat_participants where user_id = $1", [userId], undefined, transaction)
+}
+
+export const queryParticipantsDetails = async (query: QueryParticipantsDetails, transaction: transaction): Promise<ResultParticipantsDetails[] | undefined> => {
+    return await db.query<ResultParticipantsDetails>("SELECT cp.participants_id, cp.role, COALESCE(u.email, aim.model_name) AS participant_name FROM chat_participants AS cp LEFT JOIN users AS u ON cp.participants_id::text = u.id::text AND cp.type = 'user' LEFT JOIN ai_models AS aim ON cp.participants_id::text = aim.id::text AND cp.type = 'ai_model' WHERE cp.chat_id = $1 and exists (select 1 FROM chat_participants AS cp_auth where cp_auth.chat_id = $2 and cp_auth.participants_id = $3)", [query.chatId, query.chatId, query.userId], undefined, transaction)
 }
 
 /* MESSAGES */

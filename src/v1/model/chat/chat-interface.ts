@@ -33,6 +33,22 @@ export interface IChatParticipants {
     type: 'user' | 'ai_model'
 }
 
+export interface QueryParticipantsDetails {
+    userId: string,
+    chatId: string
+}
+
+export interface ResultParticipantsDetails {
+    participants_id: string,
+    role: string,
+    participant_name: string
+}
+
+export interface DtoParticipantsDetails {
+    chatId: string
+}
+
+
 /* CHAT MESSAGES */
 export interface IMessage {
     id: string,

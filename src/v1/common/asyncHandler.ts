@@ -8,16 +8,28 @@ export const safeRun = async <T>(fn: () => Promise<IResult<T>>): Promise<IResult
     return { data: process.data, error: process.error }
   } catch (e: unknown) {
     const error = e instanceof Error ? e : new Error(String(e ?? ErrorMessages.SERVER.INTERVAL_SERVER_ERROR));
-    return {error}
+    return { error }
   }
 };
 
 export const withErrorHandling = (handler: Function) => {
-    return async (req: Request, res: Response, next : NextFunction) => {
-        try {
-            return await handler(req, res, next);
-        } catch (err) {
-            return next(err)
-        }
-    };
+  return async (req: Request, res: Response, next: NextFunction) => {
+    try {
+      return await handler(req, res, next);
+    } catch (err) {
+      return next(err)
+    }
+  };
+}
+
+export const queryWithErrorHandler = async<T>(fn: () => Promise<T>): Promise<IResult<T>> => {
+  try {
+    return {
+      data: await fn()
+    }
+  } catch (e) {
+    return {
+      error: (e instanceof Error ? e : new Error("Something went wrong"))
+    }
+  }
 }

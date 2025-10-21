@@ -1,6 +1,6 @@
 import { Router } from "express";
 import { userValidateMiddleware } from "../middleware/user-validate";
-import { createChat, getAllChat, getChatMessages } from "../controller/chat-controller";
+import { createChat, getAllChat, getChatDetails, getChatMessages } from "../controller/chat-controller";
 import { body, param, query } from "express-validator";
 import { validateInputs } from "../middleware/validate-inputs";
 import { CreateChatValidation } from "../validation/chat-validation";
@@ -33,7 +33,7 @@ chatRouter.post("/create", [
 ], createChat)
 
 
-chatRouter.get("/chat/{chatId}/message/page=1&limit=50", [
+chatRouter.get("/{chatId}/message/page=1&limit=50", [
     userValidateMiddleware,
     param("chatId")
         .escape()
@@ -57,5 +57,14 @@ chatRouter.get("/getAll", [
     userValidateMiddleware
 ], getAllChat)
 
+chatRouter.get("/details/:chatId", [
+    userValidateMiddleware,
+    param("chatId")
+        .escape()
+        .trim()
+        .notEmpty()
+        .withMessage("Chat id could be not empty"),
+    validateInputs
+], getChatDetails)
 
 export default chatRouter
