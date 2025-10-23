@@ -33,23 +33,13 @@ chatRouter.post("/create", [
 ], createChat)
 
 
-chatRouter.get("/{chatId}/message/page=1&limit=50", [
+chatRouter.get("/:chatId/message/", [
     userValidateMiddleware,
     param("chatId")
         .escape()
         .trim()
         .notEmpty()
         .withMessage("Chat id is not to be empty"),
-    query("page")
-        .escape()
-        .trim()
-        .isNumeric()
-        .withMessage("Page must be a numeric"),
-    query("limit")
-        .escape()
-        .trim()
-        .isNumeric()
-        .withMessage("Limit must be a numeric"),
     validateInputs
 ], getChatMessages)
 

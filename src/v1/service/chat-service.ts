@@ -1,7 +1,7 @@
 import { ErrorMessages } from "../common/messages";
 import { PostgreDatabase } from "../database";
 import { IAiDTO } from "../model/ai/ai-interface";
-import { IChat, IChatMessageDto, IChatParticipants, IMessageDto } from "../model/chat/chat-interface";
+import { IChat, IChatMessageDto, IChatParticipants, ChatMessageDTO } from "../model/chat/chat-interface";
 import { createChat, createMembers, createMessage, getAllChats, getChat, getMembers } from "../model/chat/chat-model";
 import { IResult } from "../model/response/response-interface";
 
@@ -57,7 +57,7 @@ export const getAllChatsService = async (userId: string): Promise<IResult<Record
     })
 }
 
-export const createMessageService = async (messageDto: IMessageDto): Promise<IResult<string>> => {
+export const createMessageService = async (messageDto: ChatMessageDTO): Promise<IResult<string>> => {
     return db.transaction(async (e) => {
         await createMessage(messageDto, e)
         return { data: "Success" }

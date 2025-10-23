@@ -1,9 +1,12 @@
 import jwt, { JsonWebTokenError } from "jsonwebtoken"
 import AppConfig from "../config/app-config"
-import { decode } from "punycode"
 import { IResult } from "../model/response/response-interface"
 
-export const generateToken = (value: object, expires: number) => {
+
+
+type Times = '15m' | '30d'
+
+export const generateToken = (value: object, expires: Times) => {
     const secret = process.env.NODE_ENV == AppConfig.MODE.TEST ? process.env.TEST_SECRET_TOKEN : process.env.PRODUCTION_SECRET
     if (!secret)
         throw new Error("Secret is not defined")

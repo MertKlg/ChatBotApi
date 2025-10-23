@@ -13,8 +13,7 @@ const googleAi = new GoogleGenAI({
 
 
 export const chatSocket = (io: Server) => {
-    const userMessages : {id : string, value : object }[] = []
-    
+
     io.use(userValidateMiddlewareSocket)
 
     io.on("connection", (socket: Socket) => {
@@ -22,6 +21,8 @@ export const chatSocket = (io: Server) => {
         socket.on("joinChatRoom", async (data: any) => {
             try {
                 const { chat_id } = data
+
+                console.log("user connected the room", chatSocket, socket.id)
 
                 if (!chat_id)
                     throw new Error("Chat not founded")

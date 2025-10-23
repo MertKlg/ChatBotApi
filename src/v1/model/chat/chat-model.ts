@@ -1,5 +1,5 @@
 import { PostgreDatabase } from "../../database"
-import { CreateChat, IAllChat, IChat, IChatParticipants, IMessage, IMessageDto, QueryParticipantsDetails, ResultParticipantsDetails } from "./chat-interface"
+import { CreateChat, IAllChat, IChat, IChatParticipants, QueryParticipantsDetails, ResultParticipantsDetails, CreateChatMessageQuery, GetChatMessageQueryResult, GetChatMessageQuery } from "./chat-interface"
 import { transaction } from "../../common/types"
 
 let db = PostgreDatabase.getInstance()
@@ -29,9 +29,9 @@ export const queryParticipantsDetails = async (query: QueryParticipantsDetails, 
 }
 
 /* MESSAGES */
-export const getChatMessage = async (chatId: string, transaction: transaction): Promise<IMessage[] | undefined> => {
-    return await db.query<IMessage>("select * from messages where chat_id = $1", [chatId], undefined, transaction)
+export const getChatMessage = async (query: GetChatMessageQuery, transaction: transaction): Promise<GetChatMessageQueryResult[] | undefined> => {
+    return await db.query<GetChatMessageQueryResult>("SELECT m.id AS message_id, m.content, m.is_from_ai, m.created_at, CASE WHEN m.is_from_ai = false THEN m.sender_id::text WHEN m.is_from_ai = true THEN m.ai_model_id::text ELSE NULL END AS sender_id, COALESCE(u.email, aim.model_name) AS sender_name FROM messages AS m LEFT JOIN users AS u ON m.sender_id::text = u.id::text AND m.is_from_ai = false LEFT JOIN ai_models AS aim ON m.ai_model_id::text = aim.id::text AND m.is_from_ai = true WHERE m.chat_id = $1 AND EXISTS ( SELECT 1 FROM chat_participants AS cp_auth WHERE cp_auth.chat_id = $2 AND cp_auth.participants_id = $3 ) ORDER BY m.created_at ASC;", [query.chat_id, query.chat_id, query.user_id], undefined, transaction)
 }
-export const createMessage = async (dto: IMessageDto, transaction: transaction): Promise<void> => {
+export const createMessage = async (dto: CreateChatMessageQuery, transaction: transaction): Promise<void> => {
     await db.query("insert into messages (chat_id, sender_id, content) values ($1,$2,$3)", [dto.chat_id, dto.sender_id, dto.content], undefined, transaction)
 }

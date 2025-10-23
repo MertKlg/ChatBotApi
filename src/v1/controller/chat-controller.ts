@@ -4,15 +4,25 @@ import { createChatService, getAllChatsService } from "../service/chat-service";
 import { ErrorResponse, ResponseModel } from "../model/response/response";
 import { ErrorMessages } from "../common/messages";
 import { IAiDTO } from "../model/ai/ai-interface";
-import { queryParticipantsDetails } from "../model/chat/chat-model";
-import { ResultParticipantsDetails } from "../model/chat/chat-interface";
+import { getChatMessage, queryParticipantsDetails } from "../model/chat/chat-model";
+import { GetChatMessageQueryResult, ResultParticipantsDetails } from "../model/chat/chat-interface";
 
 
 export const getChatMessages = withErrorHandling(async (req: Request, res: Response, next: NextFunction) => {
-    const { id } = res.locals.id
-    const { chatId, limit, page } = req.params
-    // Get chat messsages with chat.id from db
+    const user = req.user
+    if (!user)
+        throw new ErrorResponse(400, "Bad request")
 
+    const { chatId } = req.params
+
+    if (!chatId)
+        throw new ErrorResponse(400, "Chat id not founded")
+    // Get chat messsages with chat.id and user.id from db
+    const result = await queryWithErrorHandler<GetChatMessageQueryResult[] | undefined>(() => getChatMessage({ chat_id: chatId, user_id: user.id }, undefined))
+    if (result.error)
+        throw new ErrorResponse(500, result.error.message)
+
+    return res.json(new ResponseModel(200, ErrorMessages.SERVER.SUCCESS, true, { "messages": result.data }))
 })
 
 // Get all chats of that users

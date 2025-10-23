@@ -49,16 +49,29 @@ export interface DtoParticipantsDetails {
 }
 
 
-/* CHAT MESSAGES */
-export interface IMessage {
-    id: string,
-    chat_id: string,
-    sender_id: string,
-    is_from_ai: boolean,
-    ai_model_id: string,
+/* MESSAGES */
+export interface GetChatMessageQueryResult {
+    message_id: string,
     content: string,
+    is_from_ai: boolean,
     created_at: Date,
-    type: string
+    sender_id: string,
+    sender_name: string
 }
 
-export type IMessageDto = Partial<Omit<IMessage, 'id' | 'is_from_ai' | 'ai_model_id' | 'created_at'>>
+export interface GetChatMessageQuery {
+    chat_id: string,
+    user_id: string
+}
+
+export interface CreateChatMessageQuery {
+    sender_id: string,
+    content: string,
+    chat_id: string
+}
+
+export interface ChatMessageDTO {
+    chat_id: string,
+    content: string,
+    sender_id: string
+}

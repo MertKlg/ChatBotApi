@@ -5,9 +5,8 @@ import { createRefreshToken, createUser, deleteRefreshToken, findRefreshTokenByT
 import { ErrorMessages } from "../common/messages";
 import { compare, hashData, hashValue } from "../common/bcrypt";
 import { generateToken } from "../common/jwt";
-import { CreateRefreshToken, IAuth, RefreshToken } from "../model/auth/auth-interface";
+import { RefreshToken } from "../model/auth/auth-interface";
 import crypto from "crypto"
-import { ErrorResponse } from "../model/response/response";
 
 let db = PostgreDatabase.getInstance()
 
@@ -53,7 +52,7 @@ export const signInUser = async (data: LoginUserDto): Promise<IResult<{ access_t
 
         return {
             data: {
-                access_token: generateToken({ user_id: findUser.id, jti: crypto.randomUUID() }, Date.now() + (15 * 60 * 1000)),
+                access_token: generateToken({ user_id: findUser.id, jti: crypto.randomUUID() }, '15m'),
                 refresh_token: refreshToken
             }
         }
@@ -65,7 +64,7 @@ export const signInUser = async (data: LoginUserDto): Promise<IResult<{ access_t
 export const refreshToken = async (data: RefreshToken): Promise<IResult<{ access_token: string, refresh_token: string }>> => {
     const result = await db.transaction(async (e) => {
         // Generate new token
-        const access_token = generateToken({ user_id: data.user_id, jti: crypto.randomUUID() }, Date.now() + (15 * 60 * 1000))
+        const access_token = generateToken({ user_id: data.user_id, jti: crypto.randomUUID() }, '15m')
 
         await deleteRefreshToken(data.id, e)
         // If token deleted create one
