@@ -2,14 +2,15 @@ import { Server, Socket } from "socket.io"
 import { userValidateMiddlewareSocket } from "../middleware/user-validate"
 import { ErrorResponse, ResponseModel } from "../model/response/response"
 import { ErrorMessages } from "../common/messages"
-import { GoogleGenAI } from "@google/genai"
 import { validateChatMessage } from "../validation/chat-validation"
-import { RedisDatabase } from "../database-2"
-
-
-const googleAi = new GoogleGenAI({
-    apiKey: `${process.env.GEMINI_KEY}`
-})
+import redisDb from "../db/redis-db"
+import { findByChatId } from "../model/ai/ai-model"
+import { askAiModels } from "../service/ai-service"
+import { insert, insert as messageInsert } from "../model/chat/chat-model"
+import { queryWithErrorHandler } from "../common/asyncHandler"
+import postgreDb from "../db/postgre-db"
+import { GetChatMessageQuery } from "../model/chat/chat-interface"
+import { IErrorResponse } from "../model/response/response-interface"
 
 
 export const chatSocket = (io: Server) => {
@@ -18,67 +19,59 @@ export const chatSocket = (io: Server) => {
 
     io.on("connection", (socket: Socket) => {
         // User clicked a chat and it joining
-        socket.on("joinChatRoom", async (data: any) => {
-            try {
-                const { chat_id } = data
-
-                console.log("user connected the room", chatSocket, socket.id)
-
-                if (!chat_id)
-                    throw new Error("Chat not founded")
-
-                socket.join(chat_id)
-
-            } catch (e) {
-
-            }
-        })
-
-        socket.on("leaveChatRoom", (data: any) => {
-            try {
-                const { chat_id } = data
-                if (!chat_id)
-                    throw new Error("Chat not founded")
-
-                socket.leave(chat_id)
-            } catch (e) {
-
-            }
-        })
-
+        const { user_id } = socket.data.user
+        console.log(user_id)
         // User sending message
         socket.on("sendMessage", async (data: any) => {
             try {
-                const { id, email } = socket.data.user
                 // Zod validation
                 const validatedMessage = await validateChatMessage.safeParseAsync(data)
                 if (validatedMessage.error) {
                     socket.emit("sendMessageError", new ErrorResponse(400, ErrorMessages.SERVER.BAD_REQUEST, false, [validatedMessage.error]))
                     return
                 }
+                const { chat_id, content } = validatedMessage.data
 
-                const userMessageDto = { content: validatedMessage.data.content, chat_id: validatedMessage.data.chat_id, type: validatedMessage.data.type, sender_id: id }
-                const randomUUID = crypto.randomUUID()
-                RedisDatabase.getInstance().setValue(`${id}-${randomUUID}`, userMessageDto)
+                // Get chat participants ai models
+                const aiModels = await findByChatId({ id: chat_id }, undefined)
 
-                // User sending message when message is validated send to ai model
-                switch (validatedMessage.data.type) {
-                    case "gemini-2.5-flash":
-                        // Ask gemini flash
-                        const gemRes = await googleAi.models.generateContent({
-                            model: "gemini-2.5-flash",
-                            contents: userMessageDto.content
-                        })
+                const answers = aiModels.map(async (e) => await askAiModels({
+                    chat_id: chat_id,
+                    content: content,
+                    ai_model_id: e.id,
+                    provider: e.provider,
+                    model_identifier: e.model_identifier
+                }))
 
-                        RedisDatabase.getInstance().remove(`${id}-${randomUUID}`)
+                const results = await Promise.all(answers)
 
-                        socket.emit("getNewMessage", new ResponseModel(200, ErrorMessages.SERVER.SUCCESS, true, gemRes.data))
-                        break;
+                const dbResult = await postgreDb.transaction(async (e) => {
+                    const messages: GetChatMessageQuery[] = []
+                    const errorMessages: IErrorResponse[] = []
 
-                    default:
-                        throw new ErrorResponse(500, "No AI founded")
-                        break
-                }
+                    const insertAiMessages = results.filter(e => e.data).map(async (message) => {
+                        if (message.data) {
+                            const { content, ai_model_id, chat_id } = message.data
+                            const messageResult = await insert({ chat_id, is_from_ai: true, ai_model_id: ai_model_id, content: content, sender_id: null }, e)
+                            if (messageResult) {
+                                messages.push(messageResult)
+                            }
+                        } else {
+                            errorMessages.push({ code: 500, message: "Something weng wrong", success: false })
+                        }
+                    })
+
+                    await Promise.all(insertAiMessages)
+
+                    await insert({ chat_id, is_from_ai: false, ai_model_id: null, content: content, sender_id: user_id }, e)
+
+                    return {
+                        data: messages,
+                        error: new Error("Something went wrong")
+                    }
+                })
+
+                socket.emit("sendMessageSuccess", new ResponseModel(200, ErrorMessages.SERVER.SUCCESS, true, dbResult))
             } catch (e) {
                 const messageHandle = e instanceof Error ? e.message : ErrorMessages.SERVER.INTERVAL_SERVER_ERROR
                 socket.emit("sendMessageError", new ErrorResponse(500, messageHandle))

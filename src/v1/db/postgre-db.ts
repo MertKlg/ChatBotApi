@@ -1,6 +1,6 @@
 import { Client, Connection, Pool, PoolClient, QueryResult } from "pg"
-import { IResult } from "./model/response/response-interface"
-import AppConfig from "./config/app-config"
+import { IResult } from "../model/response/response-interface"
+import AppConfig from "../config/app-config"
 
 abstract class Database {
     abstract query<T>(query: string, params: any[], rowMapper?: RowMapper<T>, transaction?: PoolClient): Promise<T[]>
@@ -16,7 +16,7 @@ enum TransactionTypes {
     ROLLBACK = "ROLLBACK"
 }
 
-export class PostgreDatabase implements Database {
+class PostgreDatabase implements Database {
     private static instance: PostgreDatabase
     private database?: Client
 
@@ -78,3 +78,5 @@ export class PostgreDatabase implements Database {
         }
     }
 }
+
+export default PostgreDatabase.getInstance()

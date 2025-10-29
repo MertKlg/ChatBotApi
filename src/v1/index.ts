@@ -3,30 +3,22 @@ import express from "express"
 import authRouter from "./router/auth-router"
 import errorHandler from "./middleware/error-handler"
 import AppConfig from "./config/app-config"
-import { PostgreDatabase } from "./database"
-import { RedisDatabase } from "./database-2"
 import chatRouter from "./router/chat-router"
 import { createServer } from "node:http"
 import { Server } from "socket.io"
 import { chatSocket } from "./socket"
 import profileRouter from "./router/profile-router"
 import AiRouter from "./router/ai-router"
+import redisDb from "./db/redis-db"
+import postgreDb from "./db/postgre-db"
 
 dotenv.config({
     path: [".env.development", ".env.production", ".env"]
 })
 
-PostgreDatabase.getInstance().connect().then(() => {
-    console.log("Connected to PostgreSQL")
-}).catch((err) => {
-    console.log("Failed to connect to PostgreSQL", err)
-})
+redisDb.connect()
+postgreDb.connect()
 
-RedisDatabase.getInstance().connect().then(() => {
-    console.log("Connected to Redis")
-}).catch((err) => {
-    console.log("Failed to connect to Redis", err)
-})
 
 
 const app = express()

@@ -1,12 +1,11 @@
 import { body } from "express-validator";
 import * as z from "zod";
-import { findAiModel } from "../model/ai/ai-model";
+import { findByParams } from "../model/ai/ai-model";
 
 
 export const validateChatMessage = z.object({
     chat_id: z.string().trim(),
-    content: z.string().trim(),
-    type: z.string().trim()
+    content: z.string().trim()
 })
 
 export const CreateChatValidation = () => {
@@ -24,7 +23,7 @@ export const CreateChatValidation = () => {
             .withMessage("Ai model won't be empty")
             .custom(async (value, { req }) => {
                 const valueMustBeAs = value as { id: string, model_identifier: string }
-                const validateModels = await findAiModel({ id: valueMustBeAs.id }, undefined)
+                const validateModels = await findByParams({ id: valueMustBeAs.id }, undefined)
                 if (validateModels.length < 0) {
                     throw new Error("No Ai model founded")
                 }

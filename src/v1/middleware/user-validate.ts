@@ -35,21 +35,19 @@ export const userValidateMiddlewareSocket = async (socket: Socket, next: (err?: 
             throw new Error("Token not defined")
 
         const decodedToken = await validateTokenAsync(token)
-        socket.data.user = { id: decodedToken.id, email: decodedToken.email }
+        socket.data.user = { user_id: decodedToken.user_id }
 
         const tokenExpInSecond = decodedToken.exp
 
-        console.log("jwt token expires ", tokenExpInSecond)
         const nowInSeconds = Math.floor(Date.now() / 1000)
-        console.log("current time ", nowInSeconds)
         const expiresInMillisecond = (tokenExpInSecond - nowInSeconds) * 1000
-        console.log("expires in millisecond : ", expiresInMillisecond)
 
         if (expiresInMillisecond < 0) {
             return next(new Error("Token expired"))
         }
 
         const disconnectTimer = setTimeout(() => {
+            socket.disconnect(decodedToken.user_id)
             socket.disconnect(true)
         }, expiresInMillisecond);
 
@@ -57,7 +55,7 @@ export const userValidateMiddlewareSocket = async (socket: Socket, next: (err?: 
             clearTimeout(disconnectTimer)
         })
 
-        socket.join(decodedToken.id)
+        socket.join(decodedToken.user_id)
 
         next()
     } catch (e) {

@@ -1,6 +1,7 @@
-import { PostgreDatabase } from "./src/v1/database"
 import dotenv from "dotenv"
-import { RedisDatabase } from "./src/v1/database-2"
+import redisDb from "./src/v1/db/redis-db"
+import postgreDb from "./src/v1/db/postgre-db"
+
 
 
 beforeAll(async () => {
@@ -10,20 +11,20 @@ beforeAll(async () => {
 
     console.log("setup not working !")
 
-    try{
-        await RedisDatabase.getInstance().connect()
-        await PostgreDatabase.getInstance().connect()
-    }catch(e){
+    try {
+        await redisDb.connect()
+        await postgreDb.connect()
+    } catch (e) {
         console.error(e)
     }
 })
 
 
 afterAll(async () => {
-    try{
-        RedisDatabase.getInstance().close()
-        await PostgreDatabase.getInstance().close()
-    }catch(e){
+    try {
+        redisDb.close()
+        await postgreDb.close()
+    } catch (e) {
         console.error(e)
     }
 })

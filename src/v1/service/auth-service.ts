@@ -1,17 +1,15 @@
 import { IResult } from "../model/response/response-interface";
 import { LoginUserDto, RegisterUserDto } from "../model/user/user-interface";
-import { PostgreDatabase } from "../database";
 import { createRefreshToken, createUser, deleteRefreshToken, findRefreshTokenByToken, findUserByEmail, findUserPassword } from "../model/auth/auth-model";
 import { ErrorMessages } from "../common/messages";
 import { compare, hashData, hashValue } from "../common/bcrypt";
 import { generateToken } from "../common/jwt";
 import { RefreshToken } from "../model/auth/auth-interface";
 import crypto from "crypto"
-
-let db = PostgreDatabase.getInstance()
+import postgreDb from "../db/postgre-db";
 
 export const registerUser = async (data: RegisterUserDto): Promise<IResult<string>> => {
-    const result = await db.transaction(async (e) => {
+    const result = await postgreDb.transaction(async (e) => {
         const findUser = await findUserByEmail(data.email, e)
         if (findUser) {
             throw new Error(ErrorMessages.USER.USER_ALREADY_EXISTS)
@@ -30,7 +28,7 @@ export const registerUser = async (data: RegisterUserDto): Promise<IResult<strin
 }
 
 export const signInUser = async (data: LoginUserDto): Promise<IResult<{ access_token: string, refresh_token: string }>> => {
-    const res = await db.transaction(async (e) => {
+    const res = await postgreDb.transaction(async (e) => {
         const findUser = await findUserByEmail(data.email, e)
         if (!findUser)
             throw new Error(ErrorMessages.USER.USER_NOT_FOUND)
@@ -62,7 +60,7 @@ export const signInUser = async (data: LoginUserDto): Promise<IResult<{ access_t
 }
 
 export const refreshToken = async (data: RefreshToken): Promise<IResult<{ access_token: string, refresh_token: string }>> => {
-    const result = await db.transaction(async (e) => {
+    const result = await postgreDb.transaction(async (e) => {
         // Generate new token
         const access_token = generateToken({ user_id: data.user_id, jti: crypto.randomUUID() }, '15m')
 

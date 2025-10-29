@@ -55,7 +55,7 @@ export interface GetChatMessageQueryResult {
     content: string,
     is_from_ai: boolean,
     created_at: Date,
-    sender_id: string,
+    sender_id: string | null,
     sender_name: string
 }
 
@@ -65,9 +65,11 @@ export interface GetChatMessageQuery {
 }
 
 export interface CreateChatMessageQuery {
-    sender_id: string,
+    chat_id: string,
     content: string,
-    chat_id: string
+    is_from_ai: boolean,
+    ai_model_id: string | null,
+    sender_id: string | null,
 }
 
 export interface ChatMessageDTO {

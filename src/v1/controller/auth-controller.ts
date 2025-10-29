@@ -48,7 +48,6 @@ export const refresh = withErrorHandling(async (req: Request, res: Response, nex
     const token = await refreshToken({ id, user_id: user_id, client: client, expiresAt: new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)), token: "" })
     if (token.error)
         throw new ErrorResponse(500, ErrorMessages.SERVER.INTERVAL_SERVER_ERROR)
-    console.error(token.error)
 
     if (client == "web") {
         res.cookie("refresh_token", token.data?.refresh_token, { sameSite: "strict", path: "/auth/refresh", expires: new Date(Date.now() + (30 * 24 * 60 * 60 * 1000)) })

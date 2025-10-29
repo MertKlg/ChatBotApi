@@ -1,13 +1,12 @@
 import { ErrorMessages } from "../common/messages";
-import { PostgreDatabase } from "../database";
+import postgreDb from "../db/postgre-db";
 import { IAiDTO } from "../model/ai/ai-interface";
 import { IChat, IChatMessageDto, IChatParticipants, ChatMessageDTO } from "../model/chat/chat-interface";
-import { createChat, createMembers, createMessage, getAllChats, getChat, getMembers } from "../model/chat/chat-model";
+import { createChat, createMembers, insert, getAllChats, getChat, getMembers } from "../model/chat/chat-model";
 import { IResult } from "../model/response/response-interface";
 
-let db = PostgreDatabase.getInstance()
 export const createChatService = async (userId: string, title: string, iAiDto: IAiDTO[]): Promise<IResult<string>> => {
-    return db.transaction(async (e) => {
+    return postgreDb.transaction(async (e) => {
         console.log("Create starting")
         const getChat = await createChat({ title: title }, e)
         const chatId = getChat?.id
@@ -34,7 +33,7 @@ export const createChatService = async (userId: string, title: string, iAiDto: I
 }
 
 export const getChatService = async (userId: string): Promise<IResult<(IChat | undefined)[]>> => {
-    return db.transaction(async (e) => {
+    return postgreDb.transaction(async (e) => {
         const findMembers = await getMembers(userId, e)
         if (!findMembers)
             throw new Error("No members founded")
@@ -46,7 +45,7 @@ export const getChatService = async (userId: string): Promise<IResult<(IChat | u
 }
 
 export const getAllChatsService = async (userId: string): Promise<IResult<Record<string, IChat[]>>> => {
-    return db.transaction(async (e) => {
+    return postgreDb.transaction(async (e) => {
         const chats = await getAllChats(userId, e)
         var mapping: Record<string, IChat[]> = {}
         if (!chats || chats.length < 0)
@@ -58,8 +57,8 @@ export const getAllChatsService = async (userId: string): Promise<IResult<Record
 }
 
 export const createMessageService = async (messageDto: ChatMessageDTO): Promise<IResult<string>> => {
-    return db.transaction(async (e) => {
-        await createMessage(messageDto, e)
+    return postgreDb.transaction(async (e) => {
+
         return { data: "Success" }
     })
 }
