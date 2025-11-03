@@ -31,6 +31,36 @@ export const queryParticipantsDetails = async (query: QueryParticipantsDetails, 
 export const getChatMessage = async (query: GetChatMessageQuery, transaction: transaction): Promise<GetChatMessageQueryResult[] | undefined> => {
     return await postgreDb.query<GetChatMessageQueryResult>("SELECT m.id AS message_id, m.content, m.is_from_ai, m.created_at, CASE WHEN m.is_from_ai = false THEN m.sender_id::text WHEN m.is_from_ai = true THEN m.ai_model_id::text ELSE NULL END AS sender_id, COALESCE(u.email, aim.model_name) AS sender_name FROM messages AS m LEFT JOIN users AS u ON m.sender_id::text = u.id::text AND m.is_from_ai = false LEFT JOIN ai_models AS aim ON m.ai_model_id::text = aim.id::text AND m.is_from_ai = true WHERE m.chat_id = $1 AND EXISTS ( SELECT 1 FROM chat_participants AS cp_auth WHERE cp_auth.chat_id = $2 AND cp_auth.participants_id = $3 ) ORDER BY m.created_at ASC;", [query.chat_id, query.chat_id, query.user_id], undefined, transaction)
 }
-export const insert = async (dto: CreateChatMessageQuery, transaction: transaction): Promise<GetChatMessageQuery | undefined> => {
-    return (await postgreDb.query<GetChatMessageQuery>("insert into messages (chat_id, sender_id, is_from_ai,ai_model_id, content) values ($1,$2,$3,$4,$5) returning id,chat_id,sender_id,is_from_ai,ai_model_id, content, created_at", [dto.chat_id, dto.sender_id, dto.is_from_ai, dto.ai_model_id, dto.content], undefined, transaction))[0]
+
+export const insert = async (dto: CreateChatMessageQuery, transaction: transaction): Promise<GetChatMessageQueryResult | undefined> => {
+    return (await postgreDb.query<GetChatMessageQueryResult>("insert into messages (chat_id, sender_id, is_from_ai,ai_model_id, content) values ($1,$2,$3,$4,$5)", [dto.chat_id, dto.sender_id, dto.is_from_ai, dto.ai_model_id, dto.content], undefined, transaction))[0]
+}
+
+export const insertWithReturning = async (dto: CreateChatMessageQuery, transaction: transaction): Promise<GetChatMessageQueryResult | undefined> => {
+    return (await postgreDb.query<GetChatMessageQueryResult>(`
+WITH inserted_message AS (
+    INSERT INTO messages (chat_id, sender_id, is_from_ai, ai_model_id, content)
+    VALUES ($1, $2, $3, $4, $5)
+    RETURNING *
+)
+
+SELECT
+    m.id AS message_id,
+    m.content,
+    m.is_from_ai,
+    m.created_at,
+    
+    CASE
+        WHEN m.is_from_ai = false THEN m.sender_id::text
+        WHEN m.is_from_ai = true THEN m.ai_model_id::text
+        ELSE NULL
+    END AS sender_id,
+    
+    COALESCE(u.email, aim.model_name) AS sender_name
+FROM
+    inserted_message AS m
+LEFT JOIN
+    users AS u ON m.sender_id::text = u.id::text AND m.is_from_ai = false
+LEFT JOIN
+    ai_models AS aim ON m.ai_model_id::text = aim.id::text AND m.is_from_ai = true;`, [dto.chat_id, dto.sender_id, dto.is_from_ai, dto.ai_model_id, dto.content], undefined, transaction))[0]
 }

@@ -32,7 +32,7 @@ export interface AskAiQuery {
     chat_id: string
 }
 
-export interface AskAiResponses {
+export interface AskAiResponse {
     chat_id: string,
     ai_model_id: string,
     content: string

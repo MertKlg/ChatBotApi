@@ -1,8 +1,8 @@
 import { ErrorMessages } from "../common/messages";
 import postgreDb from "../db/postgre-db";
 import { IAiDTO } from "../model/ai/ai-interface";
-import { IChat, IChatMessageDto, IChatParticipants, ChatMessageDTO } from "../model/chat/chat-interface";
-import { createChat, createMembers, insert, getAllChats, getChat, getMembers } from "../model/chat/chat-model";
+import { IChat, IChatMessageDto, IChatParticipants, ChatMessageDTO, GetChatMessageQuery, GetChatMessageQueryResult, CreateChatMessageQuery } from "../model/chat/chat-interface";
+import { createChat, createMembers, insert, getAllChats, getChat, getMembers, insertWithReturning } from "../model/chat/chat-model";
 import { IResult } from "../model/response/response-interface";
 
 export const createChatService = async (userId: string, title: string, iAiDto: IAiDTO[]): Promise<IResult<string>> => {
@@ -56,13 +56,16 @@ export const getAllChatsService = async (userId: string): Promise<IResult<Record
     })
 }
 
-export const createMessageService = async (messageDto: ChatMessageDTO): Promise<IResult<string>> => {
+export const insertMessageService = async (query: CreateChatMessageQuery): Promise<IResult<GetChatMessageQueryResult>> => {
     return postgreDb.transaction(async (e) => {
-
-        return { data: "Success" }
+        const res = await insert({ chat_id: query.chat_id, content: query.content, ai_model_id: query.ai_model_id, is_from_ai: query.is_from_ai, sender_id: query.sender_id }, e)
+        return { data: res }
     })
 }
 
-export const getChatMessages = async (dto: IChatMessageDto) => {
-
-} 
+export const insertMessageWithReturningService = async (query: CreateChatMessageQuery): Promise<IResult<GetChatMessageQueryResult>> => {
+    return postgreDb.transaction(async (e) => {
+        const res = await insertWithReturning({ chat_id: query.chat_id, content: query.content, ai_model_id: query.ai_model_id, is_from_ai: query.is_from_ai, sender_id: query.sender_id }, e)
+        return { data: res }
+    })
+}

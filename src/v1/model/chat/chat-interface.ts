@@ -72,6 +72,7 @@ export interface CreateChatMessageQuery {
     sender_id: string | null,
 }
 
+
 export interface ChatMessageDTO {
     chat_id: string,
     content: string,

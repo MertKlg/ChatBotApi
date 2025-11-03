@@ -1,46 +1,38 @@
-import { GoogleGenAI } from "@google/genai"
 import { IResult } from "../model/response/response-interface"
-import { AskAiQuery, AskAiResponses } from "../model/ai/ai-interface"
-const googleAi = new GoogleGenAI({
-    apiKey: `${process.env.GEMINI_KEY}`
-})
+import { AskAiQuery, AskAiResponse } from "../model/ai/ai-interface"
+import { GeminiClient } from "../clients/gemini-client"
+import { GetChatMessageQueryResult } from "../model/chat/chat-interface"
+import { insertMessageService, insertMessageWithReturningService } from "./chat-service"
 
-export const askAiModels = async (param: AskAiQuery): Promise<IResult<AskAiResponses>> => {
-    let data: AskAiResponses | undefined
-    var error: Error | undefined = undefined
 
+export const askAiModels = async (param: AskAiQuery): Promise<IResult<GetChatMessageQueryResult>> => {
     switch (param.provider) {
         case "google":
             try {
-                const res = await googleAi.models.generateContent({
-                    model: param.model_identifier,
-                    contents: param.content
-                })
-
-                const text = res.text
-
-                console.log(text)
-
-                if (text !== undefined) {
-                    data = {
-                        content: text,
-                        ai_model_id: param.ai_model_id,
-                        chat_id: param.chat_id
-                    } as AskAiResponses
-                } else {
-                    error = new Error("Something went wrong on ai model")
+                const client = new GeminiClient()
+                const result = await client.askAiModel(param)
+                // Result returned successfully
+                if (result != undefined) {
+                    const message = await insertMessageWithReturningService({ chat_id: result.chat_id, content: result.content, ai_model_id: result.ai_model_id, is_from_ai: true, sender_id: null })
+                    return {
+                        data: message.data,
+                        error: message.error
+                    }
                 }
+                return {
+                    data: undefined
+                }
+
             } catch (error: any) {
-                error = error instanceof Error ? error : new Error(error.message ?? "Something went wrong")
+                return {
+                    error: error instanceof Error ? error : new Error(error.message ?? "Something went wrong")
+                }
             }
             break;
 
         default:
-            error = new Error("Something went wrong");
-    }
-
-    return {
-        data: data,
-        error: error
+            return {
+                error: new Error("No ai model founded")
+            }
     }
 }
