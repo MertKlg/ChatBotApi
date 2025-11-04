@@ -17,7 +17,7 @@ dotenv.config({
 })
 
 redisDb.connect()
-postgreDb.connect()
+postgreDb.connect(process.env.DATABASE_URL)
 
 
 

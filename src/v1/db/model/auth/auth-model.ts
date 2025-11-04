@@ -1,7 +1,7 @@
 import { PoolClient } from "pg"
 import { IAuth, IAuthWithPassword } from "./auth-interface"
 import { CreateRefreshToken } from "./auth-interface"
-import postgreDb from "../../db/postgre-db"
+import postgreDb from "../../postgre-db"
 
 
 

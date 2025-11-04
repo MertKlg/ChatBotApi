@@ -1,4 +1,4 @@
-import { AskAiQuery, AskAiResponse } from "../../model/ai/ai-interface";
+import { AskAiQuery, AskAiResponse } from "../../db/model/ai/ai-interface";
 
 
 export interface AiClients {

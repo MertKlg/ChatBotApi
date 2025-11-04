@@ -1,6 +1,6 @@
 import jwt, { JsonWebTokenError } from "jsonwebtoken"
 import AppConfig from "../config/app-config"
-import { IResult } from "../model/response/response-interface"
+import { IResult } from "../db/model/response/response-interface"
 
 
 

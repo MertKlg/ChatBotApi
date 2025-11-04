@@ -1,6 +1,6 @@
 import { param } from "express-validator";
-import { transaction } from "../../common/types";
-import postgreDb from "../../db/postgre-db";
+import { transaction } from "../../../common/types";
+import postgreDb from "../../postgre-db";
 import { GetChatMessageQuery } from "../chat/chat-interface";
 import { FindAiModelParams, FindAIByChatId, IAi, InsertAiMessageQuery } from "./ai-interface";
 

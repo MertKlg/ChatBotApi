@@ -1,5 +1,5 @@
 import { NextFunction, Request, Response } from "express";
-import { ErrorResponse } from "../model/response/response";
+import { ErrorResponse } from "../db/model/response/response";
 import { JsonWebTokenError, TokenExpiredError } from "jsonwebtoken";
 
 

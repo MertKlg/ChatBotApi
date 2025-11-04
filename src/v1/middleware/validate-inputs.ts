@@ -1,7 +1,7 @@
 import { NextFunction, Request, Response } from "express"
 import { withErrorHandling } from "../common/asyncHandler"
 import { validationResult, ValidationError } from "express-validator"
-import { ErrorResponse } from "../model/response/response"
+import { ErrorResponse } from "../db/model/response/response"
 
 export const validateInputs = withErrorHandling(async (req: Request, res: Response, next: NextFunction) => {
     const validResult = validationResult(req)

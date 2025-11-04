@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from "express"
-import { IResult } from "../model/response/response-interface";
+import { IResult } from "../db/model/response/response-interface";
 
 export const withErrorHandling = (handler: Function) => {
   return async (req: Request, res: Response, next: NextFunction) => {

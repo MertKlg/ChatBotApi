@@ -1,7 +1,7 @@
 import { PoolClient } from "pg";
 import { IAuth } from "../auth/auth-interface";
 import { Profile } from "./profile-interface";
-import postgreDb from "../../db/postgre-db";
+import postgreDb from "../../postgre-db";
 
 
 export const createProfile = async (profile: Profile, user: IAuth, transaction?: PoolClient | undefined) => {

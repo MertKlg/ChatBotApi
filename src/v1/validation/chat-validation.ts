@@ -1,6 +1,6 @@
 import { body } from "express-validator";
 import * as z from "zod";
-import { findByParams } from "../model/ai/ai-model";
+import { findByParams } from "../db/model/ai/ai-model";
 
 
 export const validateChatMessage = z.object({

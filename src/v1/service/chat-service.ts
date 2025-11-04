@@ -1,9 +1,9 @@
 import { ErrorMessages } from "../common/messages";
 import postgreDb from "../db/postgre-db";
-import { IAiDTO } from "../model/ai/ai-interface";
-import { IChat, IChatMessageDto, IChatParticipants, ChatMessageDTO, GetChatMessageQuery, GetChatMessageQueryResult, CreateChatMessageQuery } from "../model/chat/chat-interface";
-import { createChat, createMembers, insert, getAllChats, getChat, getMembers, insertWithReturning } from "../model/chat/chat-model";
-import { IResult } from "../model/response/response-interface";
+import { IAiDTO } from "../db/model/ai/ai-interface";
+import { IChat, IChatMessageDto, IChatParticipants, ChatMessageDTO, GetChatMessageQuery, GetChatMessageQueryResult, CreateChatMessageQuery } from "../db/model/chat/chat-interface";
+import { createChat, createMembers, insert, getAllChats, getChat, getMembers, insertWithReturning } from "../db/model/chat/chat-model";
+import { IResult } from "../db/model/response/response-interface";
 
 export const createChatService = async (userId: string, title: string, iAiDto: IAiDTO[]): Promise<IResult<string>> => {
     return postgreDb.transaction(async (e) => {

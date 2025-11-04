@@ -6,14 +6,13 @@ import postgreDb from "./src/v1/db/postgre-db"
 
 beforeAll(async () => {
     dotenv.config({
-        path: [".development.env", ".production.env", ".env"]
+        path: [".env.development"]
     })
 
-    console.log("setup not working !")
-
     try {
-        await redisDb.connect()
-        await postgreDb.connect()
+        await postgreDb.connect(process.env.TEST_DATABASE)
+
+        await postgreDb.
     } catch (e) {
         console.error(e)
     }
@@ -22,7 +21,6 @@ beforeAll(async () => {
 
 afterAll(async () => {
     try {
-        redisDb.close()
         await postgreDb.close()
     } catch (e) {
         console.error(e)

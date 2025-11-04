@@ -1,10 +1,10 @@
-import { IResult } from "../model/response/response-interface";
-import { LoginUserDto, RegisterUserDto } from "../model/user/user-interface";
-import { createRefreshToken, createUser, deleteRefreshToken, findRefreshTokenByToken, findUserByEmail, findUserPassword } from "../model/auth/auth-model";
+import { IResult } from "../db/model/response/response-interface";
+import { LoginUserDto, RegisterUserDto } from "../db/model/user/user-interface";
+import { createRefreshToken, createUser, deleteRefreshToken, findRefreshTokenByToken, findUserByEmail, findUserPassword } from "../db/model/auth/auth-model";
 import { ErrorMessages } from "../common/messages";
 import { compare, hashData, hashValue } from "../common/bcrypt";
 import { generateToken } from "../common/jwt";
-import { RefreshToken } from "../model/auth/auth-interface";
+import { RefreshToken } from "../db/model/auth/auth-interface";
 import crypto from "crypto"
 import postgreDb from "../db/postgre-db";
 

@@ -1,6 +1,6 @@
 import { NextFunction, Request, Response } from "express"
 import { withErrorHandling } from "../common/asyncHandler"
-import { ErrorResponse, ResponseModel } from "../model/response/response"
+import { ErrorResponse, ResponseModel } from "../db/model/response/response"
 import { refreshToken, registerUser, signInUser } from "../service/auth-service"
 import { ErrorMessages } from "../common/messages"
 

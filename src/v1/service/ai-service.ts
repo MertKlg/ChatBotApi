@@ -1,7 +1,7 @@
-import { IResult } from "../model/response/response-interface"
-import { AskAiQuery, AskAiResponse } from "../model/ai/ai-interface"
+import { IResult } from "../db/model/response/response-interface"
+import { AskAiQuery, AskAiResponse } from "../db/model/ai/ai-interface"
 import { GeminiClient } from "../clients/gemini-client"
-import { GetChatMessageQueryResult } from "../model/chat/chat-interface"
+import { GetChatMessageQueryResult } from "../db/model/chat/chat-interface"
 import { insertMessageService, insertMessageWithReturningService } from "./chat-service"
 
 

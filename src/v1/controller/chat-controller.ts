@@ -1,11 +1,11 @@
 import { NextFunction, Request, Response } from "express";
 import { queryWithErrorHandler, withErrorHandling } from "../common/asyncHandler";
 import { createChatService, getAllChatsService } from "../service/chat-service";
-import { ErrorResponse, ResponseModel } from "../model/response/response";
+import { ErrorResponse, ResponseModel } from "../db/model/response/response";
 import { ErrorMessages } from "../common/messages";
-import { IAiDTO } from "../model/ai/ai-interface";
-import { getChatMessage, queryParticipantsDetails } from "../model/chat/chat-model";
-import { GetChatMessageQueryResult, ResultParticipantsDetails } from "../model/chat/chat-interface";
+import { IAiDTO } from "../db/model/ai/ai-interface";
+import { getChatMessage, queryParticipantsDetails } from "../db/model/chat/chat-model";
+import { GetChatMessageQueryResult, ResultParticipantsDetails } from "../db/model/chat/chat-interface";
 
 
 export const getChatMessages = withErrorHandling(async (req: Request, res: Response, next: NextFunction) => {

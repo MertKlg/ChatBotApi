@@ -3,7 +3,7 @@ import { userValidateMiddleware } from "../middleware/user-validate";
 import { createChat, getAllChat, getChatDetails, getChatMessages } from "../controller/chat-controller";
 import { body, param, query } from "express-validator";
 import { validateInputs } from "../middleware/validate-inputs";
-import { findByParams } from "../model/ai/ai-model";
+import { findByParams } from "../db/model/ai/ai-model";
 
 const chatRouter = Router()
 

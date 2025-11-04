@@ -1,10 +1,10 @@
 import { NextFunction, Request, Response } from "express";
 import { withErrorHandling } from "../common/asyncHandler";
-import { ErrorResponse } from "../model/response/response";
+import { ErrorResponse } from "../db/model/response/response";
 import { validateTokenAsync } from "../common/jwt";
 import { ErrorMessages } from "../common/messages";
 import { Socket } from "socket.io";
-import { findUserById } from "../model/auth/auth-model";
+import { findUserById } from "../db/model/auth/auth-model";
 
 // A basic handle verify user middleware
 export const userValidateMiddleware = withErrorHandling(async (req: Request, res: Response, next: NextFunction) => {

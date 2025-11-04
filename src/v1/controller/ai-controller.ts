@@ -1,8 +1,8 @@
 import { NextFunction, Request, Response } from "express"
 import { queryWithErrorHandler, withErrorHandling } from "../common/asyncHandler"
-import { ErrorResponse, ResponseModel } from "../model/response/response"
+import { ErrorResponse, ResponseModel } from "../db/model/response/response"
 import { ErrorMessages } from "../common/messages"
-import { getAll } from "../model/ai/ai-model"
+import { getAll } from "../db/model/ai/ai-model"
 
 
 export const getAiModelsController = withErrorHandling(async (req: Request, res: Response, next: NextFunction) => {

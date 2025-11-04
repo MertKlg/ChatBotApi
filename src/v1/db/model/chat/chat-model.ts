@@ -1,6 +1,6 @@
 import { CreateChat, IAllChat, IChat, IChatParticipants, QueryParticipantsDetails, ResultParticipantsDetails, CreateChatMessageQuery, GetChatMessageQueryResult, GetChatMessageQuery } from "./chat-interface"
-import { transaction } from "../../common/types"
-import postgreDb from "../../db/postgre-db"
+import { transaction } from "../../../common/types"
+import postgreDb from "../../postgre-db"
 
 export const createChat = async (chat: CreateChat, transaction: transaction): Promise<IChat | undefined> => {
     return (await postgreDb.query<IChat>('insert into chats (title) values($1) RETURNING id', [chat.title], undefined, transaction))[0]

@@ -1,11 +1,11 @@
 import { Client, Connection, Pool, PoolClient, QueryResult } from "pg"
-import { IResult } from "../model/response/response-interface"
+import { IResult } from "./model/response/response-interface"
 import AppConfig from "../config/app-config"
 
 abstract class Database {
     abstract query<T>(query: string, params: any[], rowMapper?: RowMapper<T>, transaction?: PoolClient): Promise<T[]>
     abstract close(): void
-    abstract connect(): Promise<void>
+    abstract connect(url: string): Promise<void>
 }
 
 type RowMapper<T> = (row: any) => T
@@ -18,18 +18,20 @@ enum TransactionTypes {
 
 class PostgreDatabase implements Database {
     private static instance: PostgreDatabase
-    private database?: Client
+    private pool?: Pool
 
     async close(): Promise<void> {
-        if (this.database)
-            await this.database.end()
+        if (this.pool)
+            await this.pool.end()
     }
 
-    async connect(): Promise<void> {
-        if (!this.database) {
-            const connString = process.env.NODE_ENV?.toString().toLowerCase().trim() == AppConfig.MODE.TEST.toLowerCase().trim() ? process.env.TEST_DATABASE_URL : process.env.DATABASE_URL
-            this.database = new Client(connString)
-            await this.database.connect()
+    async connect(url: string | undefined): Promise<void> {
+        if (!url)
+            throw new Error("No database url founded")
+
+        if (!this.pool) {
+            this.pool = new Pool({ connectionString: url })
+            await this.pool.connect()
         }
     }
 
@@ -41,11 +43,13 @@ class PostgreDatabase implements Database {
     }
 
     async query<T>(query: string, params: any[], rowMapper?: (row: any) => T, transaction?: PoolClient | undefined): Promise<T[]> {
-        if (!this.database) {
-            throw new Error("Database is not connected")
+        if (!this.pool) {
+            throw new Error("Database not initilazed")
         }
 
-        const result = transaction ? await transaction.query(query, params) : await this.database.query(query, params)
+        const
+
+        const result = transaction ? await transaction.query(query, params) : await this.pool.query(query, params)
         if (Array.isArray(result.rows) && rowMapper) {
             const mapper = result.rows.map(rowMapper)
             return mapper
@@ -54,13 +58,15 @@ class PostgreDatabase implements Database {
         } else {
             return [] as T[]
         }
+
     }
 
     async transaction<T>(func: (poolClient: PoolClient) => Promise<IResult<T>>): Promise<IResult<T>> {
-        const connString = process.env.NODE_ENV?.toString().toLowerCase().trim() == AppConfig.MODE.TEST.toLowerCase().trim() ? process.env.TEST_DATABASE_URL : process.env.DATABASE_URL
+        if (!this.pool) {
+            throw new Error("Database not initilazed")
+        }
 
-        const pool = new Pool({ connectionString: connString })
-        const poolClient = await pool.connect()
+        const poolClient = await this.pool.connect()
         try {
             await poolClient.query(TransactionTypes.BEGIN)
             const result = await func(poolClient)

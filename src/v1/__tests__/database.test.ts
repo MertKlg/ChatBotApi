@@ -1,4 +1,4 @@
-import { createUser, findUserByEmail } from "../model/auth/auth-model"
+import { createUser, findUserByEmail } from "../db/model/auth/auth-model"
 
 describe("Basic queries for database", () => {
 
